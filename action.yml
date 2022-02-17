@@ -17,6 +17,10 @@ inputs:
     description: Mark task as failed if given errors are found
     default: HIGH
     required: false
+  ignore_errors:
+    description: Comma separated list of CVE codes not to be reported
+    default: ''
+    required: false
 
 outputs:
   critical:

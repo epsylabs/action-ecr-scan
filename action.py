@@ -19,6 +19,7 @@ def process_findings(ecr, **settings):
     waiter.wait(WaiterConfig={"Delay": 5, "MaxAttempts": 10}, **settings)
     threshold = (core.get_input("fail_threshold") or 'HIGH').upper()
     threshold_index = THRESHOLDS.index(threshold)
+    ignored = list(map(lambda x: x.strip().upper(), core.get_input('ignore_errors').split(",")))
 
     paginator = ecr.get_paginator("describe_image_scan_findings")
     reported = 0
@@ -35,6 +36,10 @@ def process_findings(ecr, **settings):
         for finding in response.get("imageScanFindings").get("findings"):
             if THRESHOLDS.index(finding.get("severity")) > threshold_index:
                 core.debug(format_finding(finding))
+                continue
+
+            if finding.get("name").upper() in ignored:
+                core.warning("Ignored: " + format_finding(finding))
                 continue
 
             reported += 1
