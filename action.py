@@ -19,7 +19,7 @@ def process_findings(ecr, **settings):
     core.debug("Processing scan findings")
     waiter = ecr.get_waiter("image_scan_complete")
     waiter.wait(WaiterConfig={"Delay": 5, "MaxAttempts": 10}, **settings)
-    threshold = core.get_input("fail_threshold") or 'HIGH'
+    threshold = (core.get_input("fail_threshold") or 'HIGH').upper()
     threshold_index = THRESHOLDS.index(threshold)
 
     paginator = ecr.get_paginator("describe_image_scan_findings")
