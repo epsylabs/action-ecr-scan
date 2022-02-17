@@ -1,0 +1,38 @@
+name: "Scan docker image in ECR repository"
+description: "Scan given image in ECR repository using AWS Scanning feature"
+author: "Epsy Engineering <engieering@epsyhealth.com>"
+
+inputs:
+  name:
+    description: Name of your ECR repository
+    required: true
+  tag:
+    description: Image tag to scan
+    required: true
+  region:
+    description: The AWS region
+    default: us-east-1
+    required: false
+  fail_threshold:
+    description: Mark task as failed if given errors are found
+    default: HIGH
+    required: false
+
+outputs:
+  critical:
+    description: Number of critical findings
+  high:
+    description: Number of high findings
+  informational:
+    description: Number of informational findings
+  low:
+    description: Number of low findings
+  medium:
+    description: Number of medium findings
+  undefined:
+    description: Number of undefined findings
+
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
