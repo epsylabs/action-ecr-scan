@@ -1,5 +1,3 @@
-from pprint import pprint
-
 import boto3
 import botocore.exceptions
 from actions_toolkit import core
@@ -45,7 +43,8 @@ def process_findings(ecr, **settings):
     for severity, no in summary.items():
         core.set_output(severity.lower(), no)
 
-    return int(reported > 0)
+    if reported > 0:
+        core.set_failed("Failed image scanning")
 
 
 def get_image(ecr, repository, tag):
@@ -73,17 +72,15 @@ def main():
         imageId={"imageTag": image_tag},
     )
 
-    image = get_image(ecr, repository_name, image_tag)
-
     try:
-        return process_findings(ecr, **scan_findings)
+        process_findings(ecr, **scan_findings)
     except botocore.exceptions.WaiterError as e:
         core.debug("Scan not present.")
 
     core.info("Starting image scan")
     ecr.start_image_scan(**scan_findings)
 
-    return process_findings(ecr, **scan_findings)
+    process_findings(ecr, **scan_findings)
 
 
 if __name__ == "__main__":
