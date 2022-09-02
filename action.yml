@@ -39,4 +39,4 @@ outputs:
 
 runs:
   using: "docker"
-  image: "Dockerfile"
+  image: "docker://epsylabs/action-ecr-scan"
