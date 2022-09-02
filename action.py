@@ -83,7 +83,10 @@ def main():
         core.debug("Scan not present.")
 
     core.info("Starting image scan")
-    ecr.start_image_scan(**scan_findings)
+    try:
+        ecr.start_image_scan(**scan_findings)
+    except ecr.exceptions.LimitExceededException:
+        core.info("Using existing scan result")
 
     process_findings(ecr, **scan_findings)
 
