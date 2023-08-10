@@ -6,9 +6,9 @@ THRESHOLDS = ["CRITICAL", "HIGH", "INFORMATIONAL", "LOW", "MEDIUM", "UNDEFINED"]
 
 
 def format_finding(finding):
-    description = finding.get('description') or ''
+    description = finding.get("description") or ""
     if isinstance(description, list):
-        description = ''.join(description)
+        description = "".join(description)
 
     return f"[{finding.get('severity')}] - {finding.get('name')} - {description} ({finding.get('uri')})"
 
@@ -17,18 +17,22 @@ def process_findings(ecr, **settings):
     core.debug("Processing scan findings")
     waiter = ecr.get_waiter("image_scan_complete")
     waiter.wait(WaiterConfig={"Delay": 5, "MaxAttempts": 10}, **settings)
-    threshold = (core.get_input("fail_threshold") or 'HIGH').upper()
+    threshold = (core.get_input("fail_threshold") or "HIGH").upper()
     threshold_index = THRESHOLDS.index(threshold)
-    ignored = list(map(lambda x: x.strip().upper(), core.get_input('ignore_errors').split(",")))
+    ignored = list(
+        map(lambda x: x.strip().upper(), core.get_input("ignore_errors").split(","))
+    )
+    if core.get_input("show_kernel_errors").lower() not in ["y", "yes", "ture", "1"]:
+        ignored.extend(open("kernel.txt", "r").read().split("\n"))
 
     paginator = ecr.get_paginator("describe_image_scan_findings")
     reported = 0
     summary = {}
     for response in paginator.paginate(
-            **settings,
-            PaginationConfig={
-                "PageSize": 100,
-            },
+        **settings,
+        PaginationConfig={
+            "PageSize": 100,
+        },
     ):
         if not summary:
             summary = response.get("imageScanFindings").get("findingSeverityCounts")
@@ -53,7 +57,13 @@ def process_findings(ecr, **settings):
 
 
 def get_image(ecr, repository, tag):
-    return next(iter(ecr.describe_images(repositoryName=repository, imageIds=[{"imageTag": tag}]).get("imageDetails")))
+    return next(
+        iter(
+            ecr.describe_images(
+                repositoryName=repository, imageIds=[{"imageTag": tag}]
+            ).get("imageDetails")
+        )
+    )
 
 
 def main():

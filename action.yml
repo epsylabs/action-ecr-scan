@@ -21,6 +21,10 @@ inputs:
     description: Comma separated list of CVE codes not to be reported
     default: ''
     required: false
+  show_kernel_errors:
+    description: Enable showing kernel errors
+    default: ''
+    required: false
 
 outputs:
   critical:
